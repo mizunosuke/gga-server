@@ -15,14 +15,17 @@ class FollowController extends Controller
     {
         $loginUser = User::find($request->id);
         $followUser = User::find($id);
-
+    
         if (!$loginUser || !$followUser) {
             return response()->json(['error' => 'User not found'], 404);
         }
-
-        $loginUser->followers()->attach($followUser->id);
-
-        return response()->json(['message' => 'Successfully followed user.']);
+    
+        // フォローがすでに存在しない場合にのみフォローする
+        if (!$loginUser->following()->where('user_id', $followUser->id)->exists()) {
+            $loginUser->following()->attach($followUser->id);
+        }
+    
+        return response()->json(['message' => 'Successfully followed user.'], 200);
     }
 
     /**
@@ -81,16 +84,18 @@ class FollowController extends Controller
 
     }
 
-    public function confirmfollow ($id) {
+    public function confirmfollow (Request $request, $id) {
 
-        // ユーザーを取得
-        $user = User::findOrFail($id);
-
-        $mutualFollowers = $user->followers()->whereHas('following', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get();
-
-        return ["follow" => true];
+        // ログイン中のユーザーを取得
+        $currentUser = User::find($request->currentUserId);
+        
+        // ユーザーページのユーザーを取得
+        $user = User::find($id);
+        
+        // ログイン中のユーザーがユーザーページのユーザーをフォローしているかを確認
+        $isFollowing = $currentUser->following()->where('user_id', $user->id)->exists();
+        
+        return response()->json(['follow' => $isFollowing]);
     }
 
     /**

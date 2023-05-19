@@ -7,7 +7,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\TitleController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UsersController;
 
 /*
 |--------------------------------------------------------------------------
